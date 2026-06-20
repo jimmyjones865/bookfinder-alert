@@ -2,13 +2,18 @@
 
 Watches books on bookfinder.com **and** viaLibri.net, alerts via Discord webhook when the lowest price across either source drops below a threshold.
 
-## Setup
+## Deploy (Docker)
 
 1. `cp .env.example .env`
-2. `npm install`
-3. `npm run hash-password -- 'your-password'` → paste output into `AUTH_PASSWORD_HASH` in `.env`
-4. Set `SESSION_SECRET` (any random string) and `DISCORD_WEBHOOK_URL` in `.env`
-5. `npm start` (local) or `docker compose up -d --build` (Docker)
+2. Generate the password hash: `npm install && npm run hash-password -- 'your-password'` → paste the output into `AUTH_PASSWORD_HASH` in `.env`
+3. Set `SESSION_SECRET` (any random string) and `DISCORD_WEBHOOK_URL` in `.env`
+4. `docker compose up -d --build`
+
+To rebuild after a code change: `docker compose build app && docker compose up -d --force-recreate` — `restart` alone reuses the old image.
+
+## Local dev (no Docker)
+
+Same `.env` setup, then `npm install && npm start`. Requires Playwright's Chromium browser installed locally (`npx playwright install chromium`).
 
 ## Notes
 
