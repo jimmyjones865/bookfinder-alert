@@ -1,0 +1,7 @@
+.env
+data/
+node_modules/
+CLAUDE.md
+PLAN.md
+DECISIONS.md
+.claude/

@@ -1,0 +1,2 @@
+# Copy font files here from ~/claude-config/global/fonts/
+# cp ~/claude-config/global/fonts/* ./public/fonts/
