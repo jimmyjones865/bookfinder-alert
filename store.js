@@ -61,4 +61,4 @@ function updateBook(id, updates) {
   return books[idx];
 }
 
-module.exports = { readBooks, writeBooks, addBook, deleteBook, updateBook };
+module.exports = { readBooks, addBook, deleteBook, updateBook };
