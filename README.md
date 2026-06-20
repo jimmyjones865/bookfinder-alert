@@ -5,9 +5,10 @@ Watches books on bookfinder.com **and** viaLibri.net, alerts via Discord webhook
 ## Deploy (Docker)
 
 1. `cp .env.example .env`
-2. Generate the password hash: `npm install && npm run hash-password -- 'your-password'` → paste the output into `AUTH_PASSWORD_HASH` in `.env`
-3. Set `SESSION_SECRET` (any random string) and `DISCORD_WEBHOOK_URL` in `.env`
-4. `docker compose up -d --build`
+2. Build once: `docker compose build app`
+3. Generate the password hash: `docker compose run --rm app node hash-password.js 'your-password'` → paste the output into `AUTH_PASSWORD_HASH` in `.env`, **single-quoted** (bcrypt hashes contain `$`, which Compose otherwise tries to interpret as variable substitution in `env_file` — silently truncates the hash without the quotes)
+4. Set `SESSION_SECRET` (any random string) and `DISCORD_WEBHOOK_URL` in `.env`
+5. `docker compose up -d --build`
 
 To rebuild after a code change: `docker compose build app && docker compose up -d --force-recreate` — `restart` alone reuses the old image.
 
