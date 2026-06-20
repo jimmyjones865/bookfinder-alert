@@ -12,9 +12,11 @@ Watches books on bookfinder.com **and** viaLibri.net, alerts via Discord webhook
 
 To rebuild after a code change: `docker compose build app && docker compose up -d --force-recreate` — `restart` alone reuses the old image.
 
-## Local dev (no Docker)
+## Discord webhook
 
-Same `.env` setup, then `npm install && npm start`. Requires Playwright's Chromium browser installed locally (`npx playwright install chromium`).
+1. In Discord: server settings → Integrations → Webhooks → New Webhook
+2. Pick the channel alerts should post to, copy the webhook URL
+3. Paste it into `DISCORD_WEBHOOK_URL` in `.env`
 
 ## Notes
 
