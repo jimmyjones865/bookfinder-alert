@@ -20,13 +20,23 @@ function writeBooks(books) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(books, null, 2));
 }
 
-function addBook({ author, title, isbn, thresholdPrice }) {
+function parseYear(v, name) {
+  if (v === undefined || v === null || v === '') return null;
+  const y = Number(v);
+  if (!Number.isInteger(y) || y < 1000 || y > 9999) throw new Error(`${name} must be a 4-digit year`);
+  return y;
+}
+
+function addBook({ author, title, isbn, thresholdPrice, yearFrom, yearTo }) {
   if (!author && !title && !isbn) {
     throw new Error('At least one of author, title, isbn is required');
   }
   if (!thresholdPrice || thresholdPrice <= 0) {
     throw new Error('thresholdPrice must be a positive number');
   }
+  const yFrom = parseYear(yearFrom, 'yearFrom');
+  const yTo = parseYear(yearTo, 'yearTo');
+  if (yFrom && yTo && yFrom > yTo) throw new Error('yearFrom must be <= yearTo');
   const books = readBooks();
   const book = {
     id: crypto.randomUUID(),
@@ -34,6 +44,8 @@ function addBook({ author, title, isbn, thresholdPrice }) {
     title: title || '',
     isbn: isbn || '',
     thresholdPrice: Number(thresholdPrice),
+    yearFrom: yFrom,
+    yearTo: yTo,
     lastSeenPrice: null,
     lastAlertPrice: null,
     lastCheckedAt: null,

@@ -4,7 +4,8 @@ async function sendAlert(book, price, searchUrl, source) {
     console.warn('DISCORD_WEBHOOK_URL not set, skipping alert');
     return;
   }
-  const label = [book.title, book.author].filter(Boolean).join(' — ') || book.isbn;
+  const years = book.yearFrom || book.yearTo ? ` (${book.yearFrom || ''}–${book.yearTo || ''})` : '';
+  const label = ([book.title, book.author].filter(Boolean).join(' — ') || book.isbn) + years;
   const content = `📚 **${label}** dropped to **€${price.toFixed(2)}** on ${source} (threshold €${book.thresholdPrice.toFixed(2)})\n${searchUrl}`;
 
   const res = await fetch(webhookUrl, {

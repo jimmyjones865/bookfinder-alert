@@ -3,7 +3,7 @@ const { chromium } = require('playwright');
 const USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 
-function buildSearchUrl({ author, title, isbn }) {
+function buildSearchUrl({ author, title, isbn, yearFrom, yearTo }) {
   const params = new URLSearchParams({
     author: author || '',
     title: title || '',
@@ -14,6 +14,8 @@ function buildSearchUrl({ author, title, isbn }) {
     binding: 'ANY',
     condition: 'ANY',
   });
+  if (yearFrom) params.set('publicationMinYear', yearFrom);
+  if (yearTo) params.set('publicationMaxYear', yearTo);
   return `https://www.bookfinder.com/search/?${params.toString()}`;
 }
 

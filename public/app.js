@@ -52,7 +52,7 @@ function renderBooks(books) {
     const bf = b.sources?.bookfinder || {};
     const vl = b.sources?.vialibri || {};
     tr.innerHTML = `
-      <td>${label}${b.isbn ? `<br><span class="mono muted">${b.isbn}</span>` : ''}</td>
+      <td>${label}${b.isbn ? `<br><span class="mono muted">${b.isbn}</span>` : ''}${b.yearFrom || b.yearTo ? `<br><span class="mono muted">${b.yearFrom || ''}–${b.yearTo || ''}</span>` : ''}</td>
       <td>${fmtPrice(b.thresholdPrice)}</td>
       <td>${fmtPrice(b.lastSeenPrice)}</td>
       <td class="muted">${fmtDate(b.lastCheckedAt)}</td>
@@ -106,6 +106,8 @@ addForm.addEventListener('submit', async (e) => {
     title: fd.get('title').trim(),
     isbn: fd.get('isbn').trim(),
     thresholdPrice: parseFloat(fd.get('thresholdPrice')),
+    yearFrom: fd.get('yearFrom'),
+    yearTo: fd.get('yearTo'),
   };
   try {
     await apiFetch('/api/books', { method: 'POST', body: JSON.stringify(payload) });
