@@ -13,6 +13,7 @@ function buildSearchUrl({ author, title, isbn, yearFrom, yearTo }) {
     viewAll: 'true',
     binding: 'ANY',
     condition: 'ANY',
+    language: 'ANY', // site defaults to English when omitted
   });
   if (yearFrom) params.set('publicationMinYear', yearFrom);
   if (yearTo) params.set('publicationMaxYear', yearTo);
