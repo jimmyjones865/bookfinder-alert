@@ -8,6 +8,7 @@ Watches books on bookfinder.com **and** viaLibri.net, alerts via Discord webhook
 2. Build once: `docker compose build app`
 3. Generate the password hash: `docker compose run --rm app node hash-password.js 'your-password'` → paste the output into `AUTH_PASSWORD_HASH` in `.env`, **single-quoted** (bcrypt hashes contain `$`, which Compose otherwise tries to interpret as variable substitution in `env_file` — silently truncates the hash without the quotes)
 4. Set `SESSION_SECRET` (any random string) and `DISCORD_WEBHOOK_URL` in `.env`
+   - Optional: `VIALIBRI_USER`/`VIALIBRI_PASS` for a free viaLibri account — viaLibri requires login for new searches; without it, newly added books get no viaLibri price
 5. `docker compose up -d --build`
 
 To rebuild after a code change: `docker compose build app && docker compose up -d --force-recreate` — `restart` alone reuses the old image.

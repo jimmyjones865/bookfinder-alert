@@ -2,15 +2,36 @@ const USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 
 // Result URLs are server-signed (?s=...) over author/title/all_text only, so
-// sort and year params can be appended freely. New searches via the form now
-// redirect to /account/login, so a previously stored signed URL is reused.
+// other params can be dropped/appended freely. Dropping matters: a logged-in
+// form search carries over the account's last-used filters (years, sort, ...).
 function withFilters(signedUrl, { yearFrom, yearTo }) {
-  const u = new URL(signedUrl);
-  for (const k of ['sort', 'year_min', 'year_max']) u.searchParams.delete(k);
+  const src = new URL(signedUrl);
+  const u = new URL('https://www.vialibri.net/searches');
+  for (const k of ['author', 'title', 'all_text', 's']) {
+    if (src.searchParams.has(k)) u.searchParams.set(k, src.searchParams.get(k));
+  }
   u.searchParams.set('sort', 'price.asc');
   if (yearFrom) u.searchParams.set('year_min', yearFrom);
   if (yearTo) u.searchParams.set('year_max', yearTo);
   return u.toString();
+}
+
+// Form search requires a logged-in account; signed URLs work without one.
+async function login(page) {
+  const { VIALIBRI_USER, VIALIBRI_PASS } = process.env;
+  if (!VIALIBRI_USER || !VIALIBRI_PASS) return false;
+  await page.goto('https://www.vialibri.net/account/login', { waitUntil: 'networkidle', timeout: 30000 });
+  await page.fill('#username', VIALIBRI_USER);
+  await page.fill('#password', VIALIBRI_PASS);
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: 'networkidle', timeout: 30000 }).catch(() => null),
+    page.click('button:has-text("Log in")'),
+  ]);
+  if (page.url().includes('/account/login')) {
+    console.error('viaLibri login failed (check VIALIBRI_USER/VIALIBRI_PASS)');
+    return false;
+  }
+  return true;
 }
 
 // viaLibri has no dedicated ISBN field on its basic search form - ISBN goes
@@ -19,13 +40,12 @@ async function getSignedUrl(book, page) {
   const stored = book.sources?.vialibri?.url;
   if (stored && stored.includes('/searches?') && stored.includes('s=')) return stored;
 
+  if (!(await login(page))) return null;
   await page.goto('https://www.vialibri.net/', { waitUntil: 'networkidle', timeout: 30000 });
-  if (book.isbn) {
-    await page.fill('#all_text', book.isbn);
-  } else {
-    if (book.author) await page.fill('#author', book.author);
-    if (book.title) await page.fill('#title', book.title);
-  }
+  // Explicit '' clears values the account pre-fills from its last search.
+  await page.fill('#all_text', book.isbn || '');
+  await page.fill('#author', book.isbn ? '' : book.author || '');
+  await page.fill('#title', book.isbn ? '' : book.title || '');
   await Promise.all([
     page.waitForNavigation({ waitUntil: 'networkidle', timeout: 30000 }).catch(() => null),
     page.click('button:has-text("Search")'),
@@ -39,7 +59,7 @@ async function fetchLowestPrice(book, browser) {
   try {
     const signed = await getSignedUrl(book, page);
     if (!signed) {
-      console.warn(`viaLibri: no signed search URL for ${book.id} (form search requires login)`);
+      console.warn(`viaLibri: no signed search URL for ${book.id}`);
       return null;
     }
 
